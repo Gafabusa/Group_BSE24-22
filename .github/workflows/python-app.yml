@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -46,7 +46,7 @@ jobs:
   # Deploy job (runs after build job)
   deploy:
     needs: build
-    runs-on: windows-latest  # This job runs on Windows
+    runs-on: ubuntu-latest  # 
 
     steps:
     - name: Deploy to server

@@ -34,12 +34,15 @@ jobs:
       run: |
         pytest
 
+  deploy:
+    needs: build
+    runs-on: windows-latest
 
+    steps:
     - name: Deploy to PythonAnywhere
-        env:
-          PA_API_TOKEN: ${{ secrets.PYTHONANYWHERE_API_TOKEN }}
-          PA_USERNAME: ${{ secrets.PYTHONANYWHERE_USERNAME }}
-        run: |
-          curl -X POST -H "Authorization: Token $PA_API_TOKEN" \
-          https://www.pythonanywhere.com/api/v0/user/$PA_USERNAME/webapps/Group_BSE24-22.pythonanywhere.com/reload/
-
+      env:
+        PA_API_TOKEN: ${{ secrets.PYTHONANYWHERE_API_TOKEN }}
+        PA_USERNAME: ${{ secrets.PYTHONANYWHERE_USERNAME }}
+      run: |
+        curl -X POST -H "Authorization: Token $PA_API_TOKEN" \
+        https://www.pythonanywhere.com/api/v0/user/$PA_USERNAME/webapps/Group_BSE24-22.pythonanywhere.com/reload/

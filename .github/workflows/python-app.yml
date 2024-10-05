@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest  # Changed to ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -26,28 +26,37 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
-        # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
         pytest
 
-  # Report Build Status job (runs after build job)
   report-build-status:
     needs: build
-    runs-on: windows-latest  # This job runs on Windows
+    runs-on: ubuntu-latest  # Changed to ubuntu-latest
 
     steps:
     - name: Report build status
       run: echo "Build status: Successful"
 
-  # Deploy job (runs after build job)
   deploy:
     needs: build
-    runs-on: windows-latest  # This job runs on Windows
+    runs-on: ubuntu-latest  # Changed to ubuntu-latest
 
     steps:
-    - name: Deploy to server
-      run: echo "Deploying application..."
+    - name: Checkout the code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+
+    - name: Install requests
+      run: pip install requests
+
+    - name: Run Deployment Script
+      run: python deploy.py
+      env:
+        PYTHONANYWHERE_API_TOKEN: ${{ secrets.PYTHONANYWHERE_API_TOKEN }}

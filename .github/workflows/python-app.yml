@@ -2,16 +2,18 @@ name: Python application
 
 on:
   push:
-    branches: [ "main" ]
+    branches:  # This will trigger the jobs on any branch
+      - "*"
   pull_request:
-    branches: [ "main" ]
+    branches:  # This will trigger the jobs for pull requests to any branch
+      - "*"
 
 permissions:
   contents: read
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Changed to ubuntu-latest
+    runs-on: ubuntu-latest  # Ubuntu latest runner
 
     steps:
     - uses: actions/checkout@v4
@@ -34,17 +36,16 @@ jobs:
 
   report-build-status:
     needs: build
-    runs-on: ubuntu-latest  # Changed to ubuntu-latest
+    runs-on: ubuntu-latest  # Ubuntu latest runner
 
     steps:
-    - name: Report build status
-      run: |
-        echo "Build status: Successful"
-
+      - name: Report build status
+        run: |
+         echo "Build status: Successful"
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest  # Changed to ubuntu-latest
+    runs-on: ubuntu-latest  # Ubuntu latest runner
 
     steps:
     - name: Checkout the code

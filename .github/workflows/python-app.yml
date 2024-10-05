@@ -2,10 +2,10 @@ name: Python application
 
 on:
   push:
-    branches:  # This will trigger the jobs on any branch
+    branches:  # Trigger on any branch push
       - "*"
   pull_request:
-    branches:  # This will trigger the jobs for pull requests to any branch
+    branches:  # Trigger on any branch pull request
       - "*"
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Ubuntu latest runner
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -36,20 +36,22 @@ jobs:
 
   report-build-status:
     needs: build
-    runs-on: ubuntu-latest  # Ubuntu latest runner
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Report build status
-        run: |
-         echo "Build status: Successful"
+    -  name: Report build status
+       run: |
+        echo "Build status: Successful"
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest  # Ubuntu latest runner
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout the code
+    - name: Checkout the branch with deploy.py
       uses: actions/checkout@v4
+      with:
+        ref: Willy-Gafabusa  # Specify the branch with deploy.py here,
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v3

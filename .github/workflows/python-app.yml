@@ -41,7 +41,7 @@ jobs:
 
     steps:
     - name: Report build status
-      run: echo "Build status: Successful"
+      run: echo "Build status :'Successful'"
 
   # Deploy job (runs after build job)
   deploy:

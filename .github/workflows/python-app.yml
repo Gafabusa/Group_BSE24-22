@@ -2,49 +2,107 @@ name: Python application
 
 on:
   push:
-    branches: [ "main" ]
+    branches:  # Trigger on any branch push
+      - "*"
   pull_request:
-    branches: [ "main" ]
+    branches:  # Trigger on any branch pull request
+      - "*"
 
 permissions:
   contents: read
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"
+
+    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+        if (Test-Path requirements.txt) { pip install -r requirements.txt }
+      shell: pwsh
+
     - name: Lint with flake8
       run: |
-        # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
     - name: Test with pytest
       run: |
         pytest
 
 
-  deploy:
+  report-build-status:
     needs: build
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Deploy to PythonAnywhere
+
+    - name: Report build status
+      run: echo "Build status :Successful"
+
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the branch with deploy.py
+      uses: actions/checkout@v4
+      with:
+        ref: Willy-Gafabusa  # Specify the branch with deploy.py here
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+
+    - name: Install requests
+      run: pip install requests
+
+    - name: Deploy to Production
+      run: python deploy.py
       env:
-        PA_API_TOKEN: ${{ secrets.PYTHONANYWHERE_API_TOKEN }}
-        
-        PA_USERNAME: ${{ secrets.PYTHONANYWHERE_USERNAME }}
+        PYTHONANYWHERE_API_TOKEN: ${{ secrets.PYTHONANYWHERE_API_TOKEN }}
+
+  rollback:
+    needs: deploy
+    if: failure()  # Only run rollback if the deployment fails
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout stable version
+      uses: actions/checkout@v4
+      with:
+        ref: main 
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+
+    - name: Install requests
+      run: pip install requests
+
+    - name: Rollback to Stable Version
       run: |
-        curl -X POST -H "Authorization: Token $PA_API_TOKEN" \
-        https://www.pythonanywhere.com/api/v0/user/$PA_USERNAME/webapps/Group_BSE24-22.pythonanywhere.com/reload/
+        ssh Lynatte21@ssh.pythonanywhere.com << EOF
+        cd /home/Lynatte21/mysite
+        git checkout main
+        git pull origin main
+        touch /var/www/lynatte21_pythonanywhere_com_wsgi.py  # Restart the app
+        EOF
+      env:
+        PYTHONANYWHERE_API_TOKEN: ${{ secrets.PYTHONANYWHERE_API_TOKEN }}
+

@@ -15,6 +15,10 @@ __pycache__/
 env
 venv
 
+# .gitignore
+.env
+
+
 # other
 .DS_Store
 

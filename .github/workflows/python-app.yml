@@ -43,6 +43,7 @@ jobs:
     - name: Deploy to PythonAnywhere
       env:
         PA_API_TOKEN: ${{ secrets.PYTHONANYWHERE_API_TOKEN }}
+        
         PA_USERNAME: ${{ secrets.PYTHONANYWHERE_USERNAME }}
       run: |
         curl -X POST -H "Authorization: Token $PA_API_TOKEN" \

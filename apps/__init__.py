@@ -3,11 +3,16 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
+from dotenv import load_dotenv
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from importlib import import_module
 import os
+from prometheus_flask_exporter import PrometheusMetrics
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 db = SQLAlchemy()
@@ -50,7 +55,11 @@ def configure_database(app):
 def create_app(config):
     app = Flask(__name__)
     app.config.from_object(config)
+    metrics = PrometheusMetrics(app)
     register_extensions(app)
     register_blueprints(app)
     configure_database(app)
+    # Use the environment variables
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     return app
